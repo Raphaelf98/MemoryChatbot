@@ -11,6 +11,7 @@
 // constructor WITHOUT memory allocation
 ChatBot::ChatBot()
 {
+
     // invalidate data handles
     _image = nullptr;
     _chatLogic = nullptr;
@@ -30,6 +31,42 @@ ChatBot::ChatBot(std::string filename)
     _image = new wxBitmap(filename, wxBITMAP_TYPE_PNG);
 }
 
+
+//// STUDENT CODE
+// 1. copy constructor
+ChatBot::ChatBot(ChatBot &source)
+{
+    std::cout << "ChatBot Copy constructor called"<< std::endl;
+    //shallow copy
+
+    _rootNode = source._rootNode;
+    _chatLogic = source._chatLogic;
+    _currentNode = source._currentNode;
+    //deep copy
+    _image = new wxBitmap(*(source._image));
+    *_image = *source._image;
+
+}
+// 2. copy assignment operator
+ChatBot& ChatBot::operator = (ChatBot &source)
+{
+    std::cout << "ChatBot copy-assignment constructor called"<< std::endl;
+    //shallow copy
+    if (this == &source) return *this;
+    if(_image != NULL) {
+        delete _image;
+    }
+    _chatLogic = source._chatLogic;
+    _rootNode = source._rootNode;
+    _currentNode = source._currentNode;
+    //deep copy
+
+    _image = new wxBitmap();
+    *_image = *source._image;
+
+    return *this;
+}
+// 3. destructor with memory deallocation
 ChatBot::~ChatBot()
 {
     std::cout << "ChatBot Destructor" << std::endl;
@@ -41,10 +78,44 @@ ChatBot::~ChatBot()
         _image = NULL;
     }
 }
+// 4. Move constructor
+ChatBot::ChatBot(ChatBot &&source)
+{
+    std::cout << "ChatBot Move Constructor called"<< std::endl;
+    //shallow copy
+    _rootNode = source._rootNode;
+    _chatLogic = source._chatLogic;
+    _chatLogic->SetChatbotHandle(this);
 
-//// STUDENT CODE
-////
 
+
+    _image = source._image;
+
+    source._image = NULL;
+    source._rootNode = nullptr;
+    source._chatLogic = nullptr;
+
+}
+// 5. Move Assignment Constructor
+ChatBot& ChatBot::operator = (ChatBot &&source)
+{
+    std::cout << "ChatBot Move Assignment Constructor called"<< std::endl;
+
+    if (this == &source) return *this;
+    if (_image != NULL) delete _image;
+
+
+    _chatLogic = source._chatLogic;
+    _chatLogic->SetChatbotHandle(this);
+    _rootNode = source._rootNode;
+
+    _image = source._image;
+
+    source._image = NULL;
+    source._rootNode = nullptr;
+    source._chatLogic = nullptr;
+    return *this;
+}
 ////
 //// EOF STUDENT CODE
 
@@ -77,7 +148,7 @@ void ChatBot::ReceiveMessageFromUser(std::string message)
         // go back to root node
         newNode = _rootNode;
     }
-
+    std::cout<< "selected best fitting node to move along " << std::endl;
     // tell current node to move chatbot to new node
     _currentNode->MoveChatbotToNewNode(newNode);
 }
